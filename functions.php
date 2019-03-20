@@ -25,7 +25,7 @@ $args = array(
 );
 if($replyto) $args['reply_to_message_id'] = $update["message"]["message_id"];
 if($rmf) $args['reply_markup'] = $rm;
-if($text and !in_array($userID, $ban_list))
+if($text)
 {
 $r = new HttpRequest("post", "https://api.telegram.org/$api/sendmessage", $args);
 $rr = $r->getResponse();
