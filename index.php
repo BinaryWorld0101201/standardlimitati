@@ -1,7 +1,7 @@
 <?php
 
-//Standard Limitati Bot by cyanbox.net
-//Hai bisogno di aiuto? @Cyan_Box_Limitati_Bot
+//Standard Limitati Bot by cyanbox.netsons.org
+//Hai bisogno di aiuto? @cianoscatolo_bot
 
 /*ISTRUZIONI: 
 1) Modifica le impostazioni sottostanti
@@ -11,7 +11,7 @@
 /*Impostazioni*/
 $adminid = "123456"; //Inserisci qua il tuo User ID. Puoi ottenerlo con @usinfobot
 $startmsg = "Benvenuto nel mio <b>Limitati Bot!</b>
-Creato con cyanbox.net/github"; //Inserisci un messaggio che sarà visualizzato allo /start
+Creato con <a href='https://github.com/cyanboxdev/standardlimitati/'>StandardLimitati</a>"; //Inserisci un messaggio che sarà visualizzato allo /start
 /*Fine Impostazioni*/
 
 $api = $_GET['apikey'];
