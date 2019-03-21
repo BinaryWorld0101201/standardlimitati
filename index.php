@@ -21,9 +21,9 @@ Per sbannare, vieni nella cartella del bot, apri ban.txt e rimuovi manualmente l
 Per vedere la lista dei bannati, usa /banlist*/
 
 /*Impostazioni*/
-$adminid = "611483250"; //Inserisci qua il tuo User ID. Puoi ottenerlo con @usinfobot
-$startmsg = "📦 <b>Benvenuto nel Limitati Bot di</b> @CianoScatolo<b>!</b>
-Sai come funziona: invia testo o media, sarà recapitato a CianoScatolo, che potrà risponderti come se steste parlando in chat privata."; //Inserisci un messaggio che sarà visualizzato allo /start
+$adminid = "123456789"; //Inserisci qua il tuo User ID. Puoi ottenerlo con @usinfobot
+$startmsg = "<b>Benvenuto nel Limitati Bot di</b> @MIOUSERNAME<b>!</b>
+Sai come funziona: invia testo o media, sarà recapitato a MIOUSERNAME, che potrà risponderti come se steste parlando in chat privata."; //Inserisci un messaggio che sarà visualizzato allo /start. Al contrario di LimitatiBot o simili, questo è interamente personalizzabile, ma un riferimento a questa pagina GitHub sarebbe molto gradito!
 /*Fine Impostazioni*/
 
 $api = $_GET['apikey'];
