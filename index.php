@@ -43,11 +43,17 @@ include ("functions.php");
 
 //funzione BAN
 $banlist = file_get_contents('ban.txt');
-$ban = explode("\n", $banlist);
-if(in_array($chatID, $ban) or in_array($username, $ban))
+
+if(in_array($chatID, $ban))
 {
 sm($chatID, "Sei bannato dal bot! Il messaggio non è stato inviato.");
 exit();
+}
+
+if(in_array($username, $ban) and $username != "")
+{
+sm($chatID, "Sei bannato dal bot! Il messaggio non è stato inviato.");
+exit();	
 }
 
 //Start bot
