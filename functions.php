@@ -45,7 +45,7 @@ $args = array(
 'reply_to_message_id' => $ri,
 'forward_from' => $ff
 );
-if($replyto) $args['reply_to_message_id'] = $update["message"]["message_id"];
+//if($replyto) $args['reply_to_message_id'] = $update["message"]["message_id"];
 if($rmf) $args['reply_markup'] = $rm;
 if($text)
 {
