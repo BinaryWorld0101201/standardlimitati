@@ -1,14 +1,14 @@
 <?php
 
+define("FILEBAN", "ban.txt");
+
 echo "StandardLimitati by cianoscatolo.it - Versione 2.5.0";
 
-$api = $_GET['apikey'];
-include ("http.php");
-global $api;
-$content = file_get_contents('php://input');
-$getm0 = file_get_contents("https://api.telegram.org/$api/getMe");
-$getme = json_decode($getm0, true);
-$botusername = $getme[result][username];
+$api = $_GET["apikey"];
+$update = json_decode(file_get_contents("php://input"), true);
+require_once "http.php";
+require_once "functions.php";
+//$botusername = json_decode(file_get_contents("https://api.telegram.org/$api/getMe"), true)["result"]["username"]; //non viene usato .-.
 
 //Unisciti al canale @StandardLimitati per rimanere aggiornato sulle ultime novità della base!
 
@@ -33,105 +33,82 @@ NOTA IMPORTANTISSIMA: Il supporto alla privacy inoltro non è ancora completamen
 */
 
 //Inizio impostazioni
-
-$adminid = "611483250"; //Inserisci qua il tuo User ID. Puoi ottenerlo con @usinfobot
-$adminusername = "CianoScatolo"; //Username senza @
-$startmsg = "⛓ <b>Benvenuto nel Limitati Bot di</b> @$adminusername<b>!</b>
-Sai come funziona: invia testo o media, sarà recapitato a $adminusername, che potrà risponderti come se steste parlando in chat privata."; //Inserisci un messaggio che sarà visualizzato allo /start
+define("ADMINID", "611483250"); //Inserisci qua il tuo User ID. Puoi ottenerlo con @usinfobot
+define("ADMINUSERNAME", "CianoScatolo"); //Username senza @
+$startmsg = "⛓ <b>Benvenuto nel Limitati Bot di</b> @" . ADMINUSERNAME . "<b>!</b>
+Sai come funziona: invia testo o media, sarà recapitato a " . ADMINUSERNAME . ", che potrà risponderti come se steste parlando in chat privata."; //Inserisci un messaggio che sarà visualizzato allo /start
 //Menù start
-$menustart[] = array(
-array(
-"text" => "👤 Privata",
-"url" => "https://t.me/$adminusername"),
-array(
-"text" => "🔌 Codice sorgente",
-"url" => "https://github.com/cianoscatolo/standardlimitati"),
-);
-
+$menustart[] = [
+    [
+        "text" => "👤 Privata",
+        "url"  => "https://t.me/" . ADMINUSERNAME
+    ],
+    [
+        "text" => "🔌 Codice sorgente",
+        "url"  => "https://github.com/cianoscatolo/standardlimitati"
+    ],
+];
 //Fine impostazioni
 
-$update = json_decode($content, true); 
-$userID = $update[message][from][id];
-$msg = $update[message][text];
-$chatID = $update[message][chat][id];
-$username = $update[message][from][username];
-$messageid = $update[message][message_id];
-$replying = $update[message][reply_to_message];
-$replyforward = $update[message][reply_to_message][forward_from];
-$replytoid = $update[message][reply_to_message][from][id];
-$rfid = $update[message][reply_to_message][forward_from][id];
-include ("functions.php");
 
-//funzione BAN
-$banlist = file_get_contents('ban.txt');
-$ban = explode("\n", $banlist);
-
-if(in_array($chatID, $ban) || in_array($username, $ban) and $username != "")
-{
-sm($chatID, "Sei bannato dal bot! Il messaggio non è stato inviato.");
-exit();
+if ($chatID < 0) {
+    exit(); //Evita che il bot sia utilizzato nei gruppi
 }
 
-if($chatID < 0)
-{
-exit(); //Evita che il bot sia utilizzato nei gruppi
+//funzione BAN
+$ban = explode("\n", file_get_contents(FILEBAN));
+
+if (in_array($chatID, $ban) || in_array($username, $ban) and $username != "") {
+    sm($chatID, "Sei bannato dal bot! Il messaggio non è stato inviato.");
+    exit();
 }
 
 //Start bot
-if($msg == "/start")
-{
-sm($chatID, $startmsg, $menustart);
+if ($msg == "/start") {
+    sm($chatID, $startmsg, $menustart);
 }
 
-if($msg == "/back")
-{
-cb_reply($cbid, "", true, $cbmid, $startmsg, $menustart);
+if ($msg == "/back") {
+    cb_reply($cbid, "", true, $cbmid, $startmsg, $menustart);
 }
 //Chat Function
-if($userID != $adminid)
-{
-	$var = array(
-		'chat_id' => $adminid,
-		'from_chat_id' => $chatID,
-		'message_id' => $messageid);
-	$richiesta = new HttpRequest("get", "https://api.telegram.org/$api/forwardMessage", $var);
-	$response = $richiesta->getResponse();
-	$jsdec = json_decode($response, true);
+if ($userID != ADMINID) {
+    $var = array(
+        "chat_id"      => ADMINID,
+        "from_chat_id" => $chatID,
+        "message_id"   => $messageid
+    );
+    $richiesta = new HttpRequest("get", "https://api.telegram.org/$api/forwardMessage", $var);
+    $response = json_decode($richiesta->getResponse(), true);
 
-	if(!$jsdec[result][forward_from][id])
-	{
-		sm($chatID, "Sembra che abbia la privacy inoltro attivata!\nL'admin del bot non potrà rispondere ai tuoi messaggi."); //Supporto intero nella prox versione
-	}
-
+    if (!$response["result"]["forward_from"]["id"]) {
+        sm($chatID,
+            "Sembra che abbia la privacy inoltro attivata!\nL'admin del bot non potrà rispondere ai tuoi messaggi."); //Supporto intero nella prox versione
+    }
 }
 
-if($replying and $userID == $adminid)
-{
-	if(!$rfid)
-	{
-		sm($chatID, "Impossibile inviare, l'utente ha la privacy inoltro."); //Supporto intero nella prox versione
-		exit();
-	}
-
-	sm($rfid, $msg);
-	sm($chatID, "Inviato.");
+if ($replying and $userID == ADMINID) {
+    if (!$rfid) {
+        sm($chatID, "Impossibile inviare, l'utente ha la privacy inoltro."); //Supporto intero nella prox versione
+        exit();
+    }
+    sm($rfid, $msg);
+    sm($chatID, "Inviato.");
 }
 
 //Funzione ban
-if($msg == "/banlist")
-{
-$list = file_get_contents("ban.txt");
-if(!$list)	$list = "Nessun utente bannato.";
-sm($chatID, "<b>Lista ban:</b>
-$list",'','HTML');
+if ($msg == "/banlist") {
+    $list = file_get_contents(FILEBAN);
+    if (!$list) {
+        $list = "Nessun utente bannato.";
+    }
+    sm($chatID, "<b>Lista ban:</b>
+$list", "", "HTML");
 }
 
-if(strpos($msg,"/ban ")===0 and $chatID == $adminid)
-{
-$campo = explode(" ", $msg);
-$file = 'ban.txt';
-$current = file_get_contents($file);
-$current .= "$campo[1]\n";
-file_put_contents($file, $current);
-sm($chatID, "Ho bannato l'utente $campo[1]",'','HTML');
+if (strpos($msg, "/ban ") === 0 and $chatID == ADMINID) {
+    $campo = explode(" ", $msg);
+    $current = file_get_contents(FILEBAN) . "$campo[1]\n";
+    file_put_contents(FILEBAN, $current);
+    sm($chatID, "Ho bannato l'utente $campo[1]", "", "HTML");
 }
