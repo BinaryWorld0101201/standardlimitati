@@ -1,32 +1,36 @@
 <?php
 
-if (isset($update["message"])) {
-    $userID = $update["message"]["from"]["id"];
-    $msg = $update["message"]["text"];
-    $chatID = $update["message"]["chat"]["id"];
-    $username = $update["message"]["from"]["username"];
-    $messageid = $update["message"]["message_id"];
-    $replying = $update["message"]["reply_to_message"];
-    $replyforward = $update["message"]["reply_to_message"]["forward_from"];
-    $replytoid = $update["message"]["reply_to_message"]["from"]["id"];
-    $rfid = $update["message"]["reply_to_message"]["forward_from"]["id"];
-} elseif (isset($update["callback_query"])) {
-    $cbid = $update["callback_query"]["id"];
-    $cbdata = $update["callback_query"]["data"];
+if (isset($update['message'])) {
+    $userID = $update['message']['from']['id'];
+    $msg = $update['message']['text'];
+    $chatID = $update['message']['chat']['id'];
+    $username = $update['message']['from']['username'];
+    $messageid = $update['message']['message_id'];
+    $replyto = $update['message']['reply_to_message']['message_id'];
+    $replyforward = $update['message']['reply_to_message']['forward_from'];
+    $replytoid = $update['message']['reply_to_message']['from']['id'];
+    $rfid = $update['message']['reply_to_message']['forward_from']['id'];
+} elseif (isset($update['callback_query'])) {
+    $cbid = $update['callback_query']['id'];
+    $cbdata = $update['callback_query']['data'];
     $msg = $cbdata; //può essere pericoloso fare così, uno potrebbe erroneamente trattare i cbdata come dei messaggi e viceversa
-    $cbmid = $update["callback_query"]["message"]["message_id"];
-    $chatID = $update["callback_query"]["message"]["chat"]["id"];
-    $userID = $update["callback_query"]["from"]["id"];
-    $nome = $update["callback_query"]["from"]["first_name"];
-    $cognome = $update["callback_query"]["from"]["last_name"];
-    $username = $update["callback_query"]["from"]["username"];
+    $cbmid = $update['callback_query']['message']['message_id'];
+    $chatID = $update['callback_query']['message']['chat']['id'];
+    $userID = $update['callback_query']['from']['id'];
+    $nome = $update['callback_query']['from']['first_name'];
+    $cognome = $update['callback_query']['from']['last_name'];
+    $username = $update['callback_query']['from']['username'];
+}
+
+if(!$username)  {
+  $username = " <i>No username</i>";
 }
 
 function sm(
     $chatID,
     $text,
     $rmf = false,
-    $pm = "HTML",
+    $pm = 'HTML',
     $dis = true, // non è usato .-.
     $replyto = true, // non è usato .-.
     $inline = true,
@@ -37,13 +41,13 @@ function sm(
     global $api;
 
     $args = [
-        "chat_id"                  => $chatID,
-        "text"                     => $text,
-        "disable_web_page_preview" => true,
-        "disable_notification"     => true,
-        "parse_mode"               => $pm,
-        "reply_to_message_id"      => $ri,
-        "forward_from"             => $ff
+        'chat_id'                  => $chatID,
+        'text'                     => $text,
+        'disable_web_page_preview' => true,
+        'disable_notification'     => true,
+        'parse_mode'               => $pm,
+        'reply_to_message_id'      => $ri,
+        'forward_from'             => $ff
     ];
     //if($replyto) $args["reply_to_message_id"] = $update["message"]["message_id"];
     if (is_array($rmf)) {

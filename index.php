@@ -1,114 +1,146 @@
 <?php
 
-define("FILEBAN", "ban.txt");
+echo "StandardLimitati by <a href='htpps://t.me/NetworkCiano'>NetworkCiano</a> - Versione 3.0.0";
 
-echo "StandardLimitati by cianoscatolo.it - Versione 2.5.0";
-
+if($chatID < 0) exit; //Evita che il bot sia utilizzato nei gruppi
 $api = $_GET["apikey"];
 $update = json_decode(file_get_contents("php://input"), true);
 require_once "http.php";
 require_once "functions.php";
-//$botusername = json_decode(file_get_contents("https://api.telegram.org/$api/getMe"), true)["result"]["username"]; //non viene usato .-.
+
 
 //Unisciti al canale @StandardLimitati per rimanere aggiornato sulle ultime novità della base!
+//IMPORTANTE: Leggere il readme
 
-/*ISTRUZIONI: 
-1) Modifica le impostazioni sottostanti
-2) Imposta il Webhook aprendo nel browser il seguente link: https://api.telegram.org/botTUABOTKEY/setwebhook?url=https://SITO/CARTELLA/index.php?apikey=botTUABOTKEY
-3) Avvia il bot su Telegram: Fatto!
+//IMPOSTAZIONI
+//Inserisci nel primo array gli UserID degli admin, nel secondo gli username. Mantieni ordine verticale.
+$adminID = [123456789, 000000000, 111111111];
+$adminUsername = ['durov', 'despacito', 'aaaaa'];
 
-FUNZIONI ADMIN:
+$wdb = 'nomedb'; //nome database
+$dbuser = 'root'; //username database
+$dbpass = 'password'; //password database
+$tabella = 'limitati'; //nome tabella (no caratteri speciali)
+$host = 'localhost:3306'; //host del db - default: localhost o localhost:3306
 
-/ban USERNAME/USERID
-Rimpiazza USERID con l'ID della persona da bannare o con l'Username della persona da bannare SENZA @. ATTENZIONE: CASE SENSITIVE!
-Copia l'username dal profilo della persona da bannare per essere sicuro di non sbagliare maiuscole e che il ban venga effettuato correttamente.
-ESEMPIO 1: /ban 123456
-ESEMPIO 2: /ban cianoscatolo [da notare la mancanza della @]
-
-Per sbannare, vieni nella cartella del bot, apri ban.txt e rimuovi manualmente l'ID o l'username della persona da sbannare.
-
-Per vedere la lista dei bannati, usa /banlist
-
-NOTA IMPORTANTISSIMA: Il supporto alla privacy inoltro non è ancora completamente pronto. Adesso gli utenti ricevono una notifica che li informa di questo, ma in un futuro molto prossimo la funzione sarà implementata correttamente. Entra in @StandardLimitati per seguire gli aggiornamenti.
-*/
-
-//Inizio impostazioni
-define("ADMINID", "611483250"); //Inserisci qua il tuo User ID. Puoi ottenerlo con @usinfobot
-define("ADMINUSERNAME", "CianoScatolo"); //Username senza @
-$startmsg = "⛓ <b>Benvenuto nel Limitati Bot di</b> @" . ADMINUSERNAME . "<b>!</b>
-Sai come funziona: invia testo o media, sarà recapitato a " . ADMINUSERNAME . ", che potrà risponderti come se steste parlando in chat privata."; //Inserisci un messaggio che sarà visualizzato allo /start
+$startmsg = "⛓ <b>Benvenuto nel Limitati Bot di</b> @demo<b>!</b>"; //Inserisci un messaggio che sarà visualizzato allo /start
+$msgextra = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam blandit. "; //Messaggio del comando personale /demo
 //Menù start
-$menustart[] = [
+$menustart = [
+  [
     [
-        "text" => "👤 Privata",
-        "url"  => "https://t.me/" . ADMINUSERNAME
+        "text" => "☎️ Avvia Chat",
+        "callback_data"  => "/chat"
+    ],
+  ],
+  [
+    [
+        "text" => "❓ Sottomenù Demo",
+        "callback_data"  => "/demo"
     ],
     [
         "text" => "🔌 Codice sorgente",
         "url"  => "https://github.com/cianoscatolo/standardlimitati"
     ],
+  ],
 ];
 //Fine impostazioni
 
+//Connessione al Database
+$db = new PDO("mysql:host=" . $host . ";dbname=".$wdb, $dbuser, $dbpass);
+$db->exec('SET NAMES utf8mb4');
+$uquery = $db->prepare("SELECT * FROM $tabella WHERE chat_id = :id LIMIT 1");
+$uquery->execute(array('id' => $userID));
+$u =  $uquery->fetch(PDO::FETCH_ASSOC);
 
-if ($chatID < 0) {
-    exit(); //Evita che il bot sia utilizzato nei gruppi
+//Creazione tabella al primo avvio
+if(!$chatID)  {
+  echo "\n".'Avvio tabella...';
+  $db->query('CREATE TABLE IF NOT EXISTS '.$tabella.' (
+  id int(0) AUTO_INCREMENT,
+  chat_id bigint(0),
+  username varchar(200),
+  page varchar(200),
+  PRIMARY KEY (id))');
+  $arr = $db->errorInfo();
+  $error = print_r($arr, true);
+  echo "\n".'tabella: '.$error;
+  $db->query('CREATE TABLE IF NOT EXISTS '.'msg'.$tabella.' (
+  id int(0) AUTO_INCREMENT,
+  msgid int(0),
+  sender int(0),
+  reciever int(0),
+  txt text(0),
+  PRIMARY KEY (id))');
+  $arr = $db->errorInfo();
+  $error = print_r($arr, true);
+  echo "\n".'tabella2: '.$error;
 }
 
-//funzione BAN
-$ban = explode("\n", file_get_contents(FILEBAN));
+//Se non sei nel DB, vieni inserito
+if(!$u['id']) $db->query("insert into `$tabella` (chat_id, page, username) values ($chatID, ''," . '"'. $username.'"'.")");
 
-if (in_array($chatID, $ban) || in_array($username, $ban) and $username != "") {
-    sm($chatID, "Sei bannato dal bot! Il messaggio non è stato inviato.");
-    exit();
+//Menu del bot
+if ($msg === '/start') {
+  sm($chatID, $startmsg, $menustart);
+  $db->query("UPDATE $tabella SET page = '' WHERE chat_id = '$userID'");
 }
 
-//Start bot
-if ($msg == "/start") {
-    sm($chatID, $startmsg, $menustart);
+if ($msg === '/back') {
+    if($cbid) cb_reply($cbid, "", true, $cbmid, $startmsg, $menustart);
+    if(!$cbid)  sm($chatID, $startmsg, $menustart);
+    $db->query("UPDATE $tabella SET page = '' WHERE chat_id = '$userID'");
 }
 
-if ($msg == "/back") {
-    cb_reply($cbid, "", true, $cbmid, $startmsg, $menustart);
-}
-//Chat Function
-if ($userID != ADMINID) {
-    $var = array(
-        "chat_id"      => ADMINID,
-        "from_chat_id" => $chatID,
-        "message_id"   => $messageid
-    );
-    $richiesta = new HttpRequest("get", "https://api.telegram.org/$api/forwardMessage", $var);
-    $response = json_decode($richiesta->getResponse(), true);
-
-    if (!$response["result"]["forward_from"]["id"]) {
-        sm($chatID,
-            "Sembra che abbia la privacy inoltro attivata!\nL'admin del bot non potrà rispondere ai tuoi messaggi."); //Supporto intero nella prox versione
-    }
+if($msg === '/demo')  {
+  $menu = [
+    [
+      [
+          "text" => "🔙 Indietro",
+          "callback_data"  => "/back"
+      ],
+    ],
+  ];
+  cb_reply($cbid, "", true, $cbmid, $msgextra, $menu);
 }
 
-if ($replying and $userID == ADMINID) {
-    if (!$rfid) {
-        sm($chatID, "Impossibile inviare, l'utente ha la privacy inoltro."); //Supporto intero nella prox versione
-        exit();
-    }
-    sm($rfid, $msg);
-    sm($chatID, "Inviato.");
+//Funzione chat - Utente
+if($msg === '/chat')  {
+  $num = array_rand($adminID);
+  $menu = [
+    [
+      [
+          "text" => "📞 Cambia operatore", //Rimuovere questo bottone se c'è solo un admin.
+          "callback_data"  => "/chat"
+      ],
+      [
+          "text" => "🔙 Indietro",
+          "callback_data"  => "/back"
+      ],
+    ],
+  ];
+  cb_reply($cbid, "", true, $cbmid, "☎️ <b>Benvenuto nella chat!</b>\nSei stato messo in contatto con @".$adminUsername[$num].", ora invia il tuo messaggio.\nUsa /back quando vuoi per uscire dalla chat.", $menu);
+  $db->query("UPDATE $tabella SET page = 'chat-$adminID[$num]' WHERE chat_id = '$userID'");
 }
 
-//Funzione ban
-if ($msg == "/banlist") {
-    $list = file_get_contents(FILEBAN);
-    if (!$list) {
-        $list = "Nessun utente bannato.";
-    }
-    sm($chatID, "<b>Lista ban:</b>
-$list", "", "HTML");
+/* Decommentare per debug
+if($msg === '/page')  {
+  sm($chatID, $u['page']);
+}*/
+
+if(strpos($u['page'], 'chat-') === 0 and strpos($msg, '/') !== 0) {
+  $idadmin = explode('-', $u['page'])[1];
+  //sm($chatID, "Messaggio inviato."); //Decommentare per attivare la notifica
+  $msgid = json_decode(sm($idadmin, "👤 @$username #$userID\n\n$msg"), true)['result']['message_id'];
+  $db->query("insert into `msg$tabella` (msgid, sender, reciever, txt) values ('$msgid', '$chatID', '$idadmin', '$msg')");
 }
 
-if (strpos($msg, "/ban ") === 0 and $chatID == ADMINID) {
-    $campo = explode(" ", $msg);
-    $current = file_get_contents(FILEBAN) . "$campo[1]\n";
-    file_put_contents(FILEBAN, $current);
-    sm($chatID, "Ho bannato l'utente $campo[1]", "", "HTML");
+if(in_array($userID, $adminID)) {
+  if($replyto) {
+    $replyquery = $db->prepare("SELECT * FROM `msg$tabella` WHERE msgid = :id LIMIT 1");
+    $replyquery->execute(array('id' => $replyto));
+    $reply =  $replyquery->fetch(PDO::FETCH_ASSOC);
+    sm($reply['sender'], "🗣 <b>Risposta di $username</b>\n\n$msg");
+    sm($chatID, "Risposta inviata.");
+  }
 }
