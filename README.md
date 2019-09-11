@@ -1,13 +1,7 @@
 # StandardLimitati
-La forma più semplice di LimitatiBot vista su Telegram. 
+Una base PHP semplice, completa e veloce, con supporto a multiadmin, media, e completamente personalizzabile.
 
-# Prima configurazione
-1) Controlla di avere un database, HTTPS, server-to-server e una API Key di @BotFather.
-2) Modifica le Impostazioni in index.php
-3) Apri questo sito nel tuo browser. Sostituisci i parametri in maiuscolo.
-https://api.telegram.org/botTUABOTKEY/setwebhook?url=https://SITO/CARTELLA/index.php?apikey=botTUABOTKEY
-4) Apri https://SITO/CARTELLA/index.php per concludere l'installazione del database.
-
+Per iniziare, consulta il [manuale](https://github.com/cianoscatolo/standardlimitati/wiki) dove troverai tutte le istruzioni, anche se è la prima volta che programmi.
 
 # Serve altro?
 Hai dubbi su come configurare la base? Vuoi rimanere aggiornato sulle ultime novità? Stai riscontrando un problema?
