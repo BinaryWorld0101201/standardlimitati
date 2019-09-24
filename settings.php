@@ -2,7 +2,7 @@
 
 /*
            _____ _                  _               _ _      _           _ _        _   _
-    ____  / ____| |                | |             | | |    (_)         (_) |      | | (_) V4.0.0
+    ____  / ____| |                | |             | | |    (_)         (_) |      | | (_) V4.5.0
    / __ \| (___ | |_ __ _ _ __   __| | __ _ _ __ __| | |     _ _ __ ___  _| |_ __ _| |_ _
   / / _` |\___ \| __/ _` | '_ \ / _` |/ _` | '__/ _` | |    | | '_ ` _ \| | __/ _` | __| |
  | | (_| |____) | || (_| | | | | (_| | (_| | | | (_| | |____| | | | | | | | || (_| | |_| |
@@ -15,6 +15,7 @@
 |  |  | |    \__/ .__/  |  /~~\ /_ | \__/ | \| |    \__> |___ | \| |___ |  \ /~~\ |___ |
 Modifica le impostazioni a tuo piacimento. Per più informazioni, leggi le docs.
 
+This work is licensed under a Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License.
 */
 
 //ADMINS - DA MODIFICARE

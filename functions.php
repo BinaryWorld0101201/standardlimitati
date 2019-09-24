@@ -2,7 +2,7 @@
 
 /*
            _____ _                  _               _ _      _           _ _        _   _
-    ____  / ____| |                | |             | | |    (_)         (_) |      | | (_) V4.0.0
+    ____  / ____| |                | |             | | |    (_)         (_) |      | | (_) V4.5.0
    / __ \| (___ | |_ __ _ _ __   __| | __ _ _ __ __| | |     _ _ __ ___  _| |_ __ _| |_ _
   / / _` |\___ \| __/ _` | '_ \ / _` |/ _` | '__/ _` | |    | | '_ ` _ \| | __/ _` | __| |
  | | (_| |____) | || (_| | | | | (_| | (_| | | | (_| | |____| | | | | | | | || (_| | |_| |
@@ -14,16 +14,51 @@
   |__  |  | |\ |  / | /  \ |\ | |
   |    \__/ | \| /_ | \__/ | \| |
 Modifica questo file solo se sai quello che fai. Leggi le docs.
+Grazie @Mastmat per la classe http
 
+This work is licensed under a Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License.
 */
+
+class http{
+private $curl;
+public function __construct(){
+	$this->curl = curl_init();
+}
+
+public function get($url){
+curl_setopt_array($this->curl, [
+    CURLOPT_RETURNTRANSFER => 1,
+    CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
+    CURLOPT_URL => $url
+]);
+$resp = curl_exec($this->curl);
+return $resp;
+}
+
+public function post($url, $postfields){
+curl_setopt_array($this->curl, [
+    CURLOPT_RETURNTRANSFER => 1,
+    CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
+    CURLOPT_URL => $url,
+    CURLOPT_POST => 1,
+    CURLOPT_POSTFIELDS => $postfields
+]);
+$resp = curl_exec($this->curl);
+return $resp;
+}
+
+public function __destruct(){
+curl_close($this->curl);
+}
+}
+
+$http = new http;
 
 if (isset($update['message'])) {
     $userID = $update['message']['from']['id'];
     $msg = $update['message']['text'];
     $chatID = $update['message']['chat']['id'];
     $username = $update['message']['from']['username'];
-    $nome = $update['message']['from']['name'];
-    $cognome['message']['from']['surname'];
     $messageid = $update['message']['message_id'];
     $replyto = $update['message']['reply_to_message']['message_id'];
     $replyforward = $update['message']['reply_to_message']['forward_from'];
@@ -45,51 +80,30 @@ if(!$username)  {
   $username = " <i>No username</i>";
 }
 
-function sm(
-    $chatID,
-    $text,
-    $rmf = false,
-    $pm = 'HTML',
-    $dis = true, // non è usato .-.
-    $replyto = true, // non è usato .-.
-    $inline = true,
-    $dil = true, // non è usato .-.
-    $ff = false,
-    $ri = false
-) {
+function sm($chatID, $text, $rmf = false){
     global $api;
+    global $http;
 
-    $args = [
-        'chat_id'                  => $chatID,
-        'text'                     => $text,
-        'disable_web_page_preview' => true,
-        'disable_notification'     => true,
-        'parse_mode'               => $pm,
-        'reply_to_message_id'      => $ri,
-        'forward_from'             => $ff
-    ];
-    //if($replyto) $args["reply_to_message_id"] = $update["message"]["message_id"];
-    if (is_array($rmf)) {
-        if ($inline) {
-            $rm = [
-                "inline_keyboard" => $rmf
-            ];
-        } else {
-            $rm = [
-                "keyboard"        => $rmf,
-                "resize_keyboard" => true
-            ];
-        }
-        $args["reply_markup"] = json_encode($rm);
+    $args = array(
+    'chat_id' => $chatID,
+    'text' => $text,
+    'parse_mode' => 'HTML'
+     );
+
+    if($rmf){
+        $rm = array('inline_keyboard' => $rmf);
+        $rm = json_encode($rm);
+        $args['reply_markup'] = $rm;
     }
-    $r = new HttpRequest("post", "https://api.telegram.org/$api/sendmessage", $args);
 
-    return $r->getResponse();
+    $resp = $http->post('https://api.telegram.org/'.$api.'/sendMessage', $args);
+    return $resp;
 }
 
 function cb_reply($id, $text, $alert = false, $cbmid = false, $ntext = false, $nmenu = false, $npm = "HTML")
 {
     global $api;
+    global $http;
     global $chatID;
 
     $args = [
@@ -97,7 +111,7 @@ function cb_reply($id, $text, $alert = false, $cbmid = false, $ntext = false, $n
         "text"              => $text,
         "show_alert"        => $alert
     ];
-    $r = new HttpRequest("post", "https://api.telegram.org/$api/answerCallbackQuery", $args);
+    $resp = $http->post("https://api.telegram.org/$api/answerCallbackQuery", $args);
 
     if ($cbmid !== false) {
         $args = [
@@ -111,20 +125,21 @@ function cb_reply($id, $text, $alert = false, $cbmid = false, $ntext = false, $n
         if (is_array($nmenu)) {
             $args["reply_markup"] = json_encode(["inline_keyboard" => $nmenu]);
         }
-        $r = new HttpRequest("post", "https://api.telegram.org/$api/editMessageText", $args);
+        $resp = $http->post("https://api.telegram.org/$api/editMessageText", $args);
     }
 
-    return $r->getResponse();
+    return $resp;
 }
 
 
 function forward($chat_id, $from_chat_id, $message_id) {
   global $api;
+  global $http;
   $args = [
       "chat_id"                  => $chat_id,
       "from_chat_id"             => $from_chat_id,
       "message_id"               => $message_id
   ];
-  $r = new HttpRequest("post", "https://api.telegram.org/$api/ForwardMessage", $args);
-  return $r->getResponse();
+  $resp = $http->post("https://api.telegram.org/$api/ForwardMessage", $args);
+  return $resp;
 }
