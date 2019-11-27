@@ -2,7 +2,7 @@
 
 /*
            _____ _                  _               _ _      _           _ _        _   _
-    ____  / ____| |                | |             | | |    (_)         (_) |      | | (_) V4.5.0
+    ____  / ____| |                | |             | | |    (_)         (_) |      | | (_) V5.0.0
    / __ \| (___ | |_ __ _ _ __   __| | __ _ _ __ __| | |     _ _ __ ___  _| |_ __ _| |_ _
   / / _` |\___ \| __/ _` | '_ \ / _` |/ _` | '__/ _` | |    | | '_ ` _ \| | __/ _` | __| |
  | | (_| |____) | || (_| | | | | (_| | (_| | | | (_| | |____| | | | | | | | || (_| | |_| |
@@ -14,42 +14,41 @@
   |__  |  | |\ |  / | /  \ |\ | |
   |    \__/ | \| /_ | \__/ | \| |
 Modifica questo file solo se sai quello che fai. Leggi le docs.
-Grazie @Mastmat per la classe http
+
+Grazie t.me/Mastmat per la classe http
 
 This work is licensed under a Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License.
 */
 
 class http{
-private $curl;
-public function __construct(){
-	$this->curl = curl_init();
-}
+	private $curl;
 
-public function get($url){
-curl_setopt_array($this->curl, [
-    CURLOPT_RETURNTRANSFER => 1,
-    CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
-    CURLOPT_URL => $url
-]);
-$resp = curl_exec($this->curl);
-return $resp;
-}
-
-public function post($url, $postfields){
-curl_setopt_array($this->curl, [
-    CURLOPT_RETURNTRANSFER => 1,
-    CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
-    CURLOPT_URL => $url,
-    CURLOPT_POST => 1,
-    CURLOPT_POSTFIELDS => $postfields
-]);
-$resp = curl_exec($this->curl);
-return $resp;
-}
-
-public function __destruct(){
-curl_close($this->curl);
-}
+	public function __construct(){
+		$this->curl = curl_init();
+	}
+	public function get($url){
+		curl_setopt_array($this->curl, [
+    	CURLOPT_RETURNTRANSFER => 1,
+    	CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
+    	CURLOPT_URL => $url
+		]);
+		$resp = curl_exec($this->curl);
+		return $resp;
+	}
+	public function post($url, $postfields){
+		curl_setopt_array($this->curl, [
+    	CURLOPT_RETURNTRANSFER => 1,
+    	CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
+    	CURLOPT_URL => $url,
+    	CURLOPT_POST => 1,
+    	CURLOPT_POSTFIELDS => $postfields
+		]);
+		$resp = curl_exec($this->curl);
+		return $resp;
+	}
+	public function __destruct(){
+		curl_close($this->curl);
+	}
 }
 
 $http = new http;
@@ -83,11 +82,13 @@ if(!$username)  {
 function sm($chatID, $text, $rmf = false){
     global $api;
     global $http;
+		global $hideWebPagePreview;
 
     $args = array(
     'chat_id' => $chatID,
     'text' => $text,
-    'parse_mode' => 'HTML'
+    'parse_mode' => 'HTML',
+		'disable_web_page_preview' => $hideWebPagePreview
      );
 
     if($rmf){
@@ -142,4 +143,16 @@ function forward($chat_id, $from_chat_id, $message_id) {
   ];
   $resp = $http->post("https://api.telegram.org/$api/ForwardMessage", $args);
   return $resp;
+}
+
+
+function delete($chatID, $msg_id){
+	global $http;
+	global $api;
+	$args = [
+		'chat_id' => $chatID,
+		'message_id' => $msg_id,
+	];
+	$resp = $http->post("https://api.telegram.org/$api/deleteMessage", $args);
+	return $resp;
 }
