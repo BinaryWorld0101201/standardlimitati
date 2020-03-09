@@ -184,8 +184,7 @@ if(strpos($u['page'], 'chat-') === 0 and strpos($msg, '/') !== 0) {
     $admins =  $adminsquery->fetchAll(PDO::FETCH_ASSOC);
     foreach($admins as $singleAdmin) {
       $msgid = json_decode(forward($singleAdmin['chat_id'], $chatID, $messageid), true)['result']['message_id'];
-      $insert = $db->prepare("INSERT into `msg$tabella` (msgid, sender, reciever, txt) VALUES ('$msgid', '$chatID', '".$singleAdmin['chat_id']."', :msg)");
-      $insert = $db->execute([':msg' => $msg]);
+      $db->query("INSERT into `msg$tabella` (msgid, sender, reciever) VALUES ('$msgid', '$chatID', '".$singleAdmin['chat_id']."')");
     }
     if($notifySentUser) sm($chatID, 'Messaggio inviato.');
     exit;
